@@ -8,8 +8,15 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
+// CORS configuration
+app.use(cors({
+  origin: ['http://91.105.198.152:3000', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 app.use(fileUpload({
   createParentPath: true,
