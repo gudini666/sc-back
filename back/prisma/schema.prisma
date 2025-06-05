@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Track {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  genre       String?
+  audioUrl    String
+  coverUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  likes       Like[]
+  reposts     Repost[]
+  comments    Comment[]
+
+  @@index([userId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  trackId   String
+
+  @@unique([userId, trackId])
+}
+
+model Repost {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  trackId   String
+
+  @@unique([userId, trackId])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tracks    Track[]
+  likes     Like[]
+  reposts   Repost[]
+  comments  Comment[]
+  followers Follow[] @relation("following")
+  following Follow[] @relation("follower")
+}
+
+model Follow {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  followerId String
+  follower   User   @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User   @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  trackId   String
+  user      User     @relation(fields: [userId], references: [id])
+  track     Track    @relation(fields: [trackId], references: [id])
+} 
